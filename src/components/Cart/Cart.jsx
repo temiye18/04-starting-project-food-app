@@ -1,13 +1,33 @@
 import React from "react";
+import { useGlobalContext } from "../../store/CartProvider";
 import Modal from "../UI/Modal";
+import CartItem from "./CartItem";
 import classes from "./Cart.module.css";
 
 const Cart = (props) => {
-  const cartData = [{ id: "c1", name: "sushi", amount: 2, price: 12.99 }];
+  const { items, totalAmount, addItem, removeItem } = useGlobalContext();
+
+  const totalAmountFigure = `$${totalAmount.toFixed(2)}`;
+
+  const hasItems = items.length > 0;
+
+  const cartItemRemoveHandler = (id) => {
+    removeItem(id);
+  };
+
+  const cartItemAddHandler = (item) => {
+    addItem({ ...item, amount: 1 });
+  };
+
   const cartItems = (
     <ul className={classes["cart-items"]}>
-      {cartData.map((item) => (
-        <li>{item.name}</li>
+      {items.map((item) => (
+        <CartItem
+          key={item.id}
+          item={item}
+          onRemove={cartItemRemoveHandler.bind(null, item.id)}
+          onAdd={cartItemAddHandler.bind(null, item)}
+        />
       ))}
     </ul>
   );
@@ -17,13 +37,13 @@ const Cart = (props) => {
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
-        <span>35.62</span>
+        <span>{totalAmountFigure}</span>
       </div>
       <div className={classes.actions}>
         <button className={classes["button--alt"]} onClick={props.onHideCart}>
           Close
         </button>
-        <button className={classes.button}>Order</button>
+        {hasItems && <button className={classes.button}>Order</button>}
       </div>
     </Modal>
   );
